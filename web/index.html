@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer item</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/js/bootstrap.bundle.min.js">
+</head>
+<body>
+<h1>Hello</h1>
+
+
+<h1>Hello Welcome Page ! </h1>
+<div class="row">
+    <form id="customerForm">
+        <div class="mb-3">
+            <label for="cusId" class="form-label" >Customer ID</label>
+            <input type="text" class="form-control" id="cusId" style="width: 350px" placeholder="customer id" name="cusId">
+
+            <label for="cusName" class="form-label">Customer Name</label>
+            <input type="text" class="form-control" id="cusName" style="width: 350px" placeholder="customer name" name="cusName">
+
+            <label for="cusAddress" class="form-label">Customer Address</label>
+            <input type="text" class="form-control" id="cusAddress" style="width: 350px" placeholder="customer address" name="cusAddress">
+
+            <label for="cusSalary" class="form-label">Customer Salary</label>
+            <input type="text" class="form-control" id="cusSalary" style="width: 350px" placeholder="customer salary" name="cusSalary">
+            <br>
+        </div>
+        <!--row-->
+        <hr>
+        <button type="button" class="btn btn-primary" id="save-button">Save Button</button>
+        <button type="button" class="btn btn-success" id="updateBtn">Update</button>
+        <button type="button" class="btn btn-danger" id="deleteBtn">Delete Customer</button>
+        <button type="button" class="btn btn-dark" id="getAll">Get All</button>
+    </form>
+</div>
+<hr>
+<div class="row">
+    <div class="col">
+
+        <table class="table table-dark table-hover">
+            <thead class="bg-danger text-white">
+
+
+            <tr>
+                <td>Customer ID</td>
+                <td>Customer Name</td>
+                <td>Customer Address</td>
+                <td>Customer Salary</td>
+            </tr>
+            </thead>
+
+
+            <tbody id="tableCustomer">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--item table-->
+<h1>Item Details</h1>
+<form id="itemForm">
+    <div class="mb-3">
+        <label for="itemCode" class="form-label">ITEM CODE</label>
+        <input type="text" class="form-control" id="itemCode" placeholder="Item Code" name="itemCode">
+    </div>
+    <div class="mb-3">
+        <label for="itemName" class="form-label">ITEM NAME</label>
+        <input type="text" class="form-control" id="itemName" placeholder="Item Name" name="itemName">
+    </div>
+    <div class="mb-3">
+        <label for="itemQty" class="form-label">QTY</label>
+        <input type="text" class="form-control" id="itemQty" placeholder="Qty" name="itemQty">
+    </div>
+    <div class="mb-3">
+        <label for="itemPrice" class="form-label">PRICE</label>
+        <input type="text" class="form-control" id="itemPrice" placeholder="Price" name="itemPrice">
+    </div>
+
+    <button type="button" class="btn btn-primary" id="ItemSave">Save</button>
+    <button type="button" class="btn btn-success" id="ItemUpdate">Update</button>
+    <button type="button" class="btn btn-warning" id="ItemDelete">Delete</button>
+    <button type="button" class="btn btn-info" id="itemGetAll">Get All</button>
+</form>
+
+<table class="table table-success table-striped table-hover">
+    <thead>
+    <tr>
+        <td>Item Code</td>
+        <td>Item Name</td>
+        <td>Qty</td>
+        <td>Item price</td>
+    </tr>
+    </thead>
+    <tbody id="tableItem">
+
+    </tbody>
+</table>
+
+
+<script src="assets/JQuery/jquery-3.6.0.min.js"></script>
+<script>
+    loadAllCustomer();
+    function loadAllCustomer(){
+        $("#tableCustomer").empty();
+        $.ajax({
+            url: "customer",
+            method:"GET",
+            /*  dataType:"json",*/
+            success: function (resp) {
+                console.log(typeof resp);
+                for (const customer of resp) {
+                    let row=`<tr><td>${customer.id}</td><td>${customer.name}</td><td>${customer.address}</td><td>${customer.salary}</td></tr>`;
+                    $("#tableCustomer").append(row);
+                }
+                bindClickEvent();
+            }
+        });
+    }
+
+    $('#getAll').click(function (){
+        loadAllCustomer();
+    });
+
+    $("#save-button").click(function (){
+        var data=$("#customerForm").serialize();
+        console.log(data);
+        $.ajax({
+            url: "customer",
+            method: "POST",
+            data:data,
+            success:function (res){
+                alert(res);
+                loadAllCustomer();
+            },
+            error:function (ob, textStatus ,error){
+                alert(textStatus);
+                console.log(ob.responseText);
+            }
+        });
+    });
+
+    $("#deleteBtn").click(function (){
+        let customerId = $("#cusId").val();
+        $.ajax({
+            url:"customer?cusId="+customerId,
+
+            method: "DELETE",
+            success:function (res){
+                console.log(res);
+            }
+        });
+    });
+
+    $("#updateBtn").click(function () {
+
+        let formData = $("#customerForm").serialize();
+        console.log(formData);
+        $.ajax({
+            url: "customer?" + formData,
+            method: "PUT",
+            data:formData,
+            success: function (res) {
+                alert(res);
+                loadAllCustomers();
+            }
+        });
+    });
+
+
+    function bindClickEvent() {
+        $("#tableCustomer>tr").click(function () {
+            let id = $(this).children().eq(0).text();
+            let name = $(this).children().eq(1).text();
+            let address = $(this).children().eq(2).text();
+            let salary = $(this).children().eq(3).text();
+
+            $("#cusId").val(id);
+            $("#cusName").val(name);
+            $("#cusAddress").val(address);
+            $("#cusSalary").val(salary);
+
+        });
+    }
+//item script
+    loadAllItem();
+    function loadAllItem(){
+        $("#tableItem").empty();
+        $.ajax({
+            url: "item",
+            method:"GET",
+            /*  dataType:"json",*/
+            success: function (resp) {
+                console.log(typeof resp);
+                for (const item of resp) {
+                    let row=`<tr><td>${item.id}</td><td>${item.name}</td><td>${item.qty}</td><td>${item.price}</td></tr>`;
+                    $("#tableItem").append(row);
+                }
+                bindClickEvents();
+            }
+        });
+    }
+
+    $('#itemGetAll').click(function (){
+        loadAllItem();
+    });
+
+    $("#ItemSave").click(function (){
+        var data=$("#itemForm").serialize();
+        console.log(data);
+        $.ajax({
+            url: "item",
+            method: "POST",
+            data:data,
+            success:function (res){
+                alert(res);
+                loadAllItem();
+            },
+            error:function (ob, textStatus ,error){
+                alert(textStatus);
+                console.log(ob.responseText);
+            }
+        });
+    });
+
+    $("#ItemDelete").click(function (){
+        let ItemId = $("#itemCode").val();
+        $.ajax({
+            url:"item?itemCode="+ItemId,
+
+            method: "DELETE",
+            success:function (res){
+                alert(res);
+                loadAllItem();
+            }
+        });
+    });
+
+    $("#ItemUpdate").click(function () {
+
+        let formData = $("#itemForm").serialize();
+        console.log(formData);
+        $.ajax({
+            url: "item?" + formData,
+            method: "PUT",
+            data:formData,
+            success: function (res) {
+                alert(res);
+                loadAllItem();
+            }
+        });
+    });
+
+
+    function bindClickEvents() {
+        $("#tableItem>tr").click(function () {
+            let id = $(this).children().eq(0).text();
+            let name = $(this).children().eq(1).text();
+            let qty = $(this).children().eq(2).text();
+            let price = $(this).children().eq(3).text();
+
+            $("#itemCode").val(id);
+            $("#itemName").val(name);
+            $("#itemQty").val(qty);
+            $("#itemPrice").val(price);
+
+        });
+    }
+
+
+
+</script>
+
+</body>
+</html>
